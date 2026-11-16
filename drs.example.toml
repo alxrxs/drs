@@ -1,0 +1,45 @@
+# drs configuration. Paths are read at start; secrets are files (mode 0600,
+# owned by the service user), never inline values.
+
+[service]
+# The federation service name: the SCP's enterpriseDrsName, the certificate's
+# name, and the Kerberos SPN HTTP/<host> the keytab holds.
+host = "adfs.example.test"
+listen = "::"
+port = 443
+tls_cert = "/etc/drs/tls.pem"
+tls_key = "/etc/drs/tls.key"
+# The <id> of urn:ms-drs:<id>. When replacing AD FS, use AD FS's
+# (Get-AdfsDeviceRegistration, or the discovery document's resource IDs).
+resource_id = "434DF4A9-3CF2-4C1D-917E-2CD2B72F515A"
+upn_suffixes = ["example.test"]
+
+[ldap]
+uri = "ldaps://dc1.example.test,ldaps://dc2.example.test"
+bind_dn = "CN=svc-drs,OU=Service Accounts,DC=example,DC=test"
+password_file = "/etc/drs/ldap-password"
+ca_file = "/etc/drs/ad-ca.pem"
+base_dn = "DC=example,DC=test"
+devices_dn = "CN=RegisteredDevices,DC=example,DC=test"
+# Only members (nested included) may enrol a Hello key.
+enrol_group_dn = "CN=WHfB-Enrol,OU=Groups,DC=example,DC=test"
+
+[keys]
+issuer_cert = "/etc/drs/issuer.pem"
+issuer_key = "/etc/drs/issuer.key"
+signing_cert = "/etc/drs/signing.pem"
+signing_key = "/etc/drs/signing.key"
+state_key_file = "/etc/drs/state.key"
+keytab = "/etc/drs/http.keytab"
+
+[keycloak]
+issuer = "https://sso.example.test/realms/example"
+client_id = "drs"
+client_secret_file = "/etc/drs/keycloak-secret"
+# The acr the step-up flow sets; any other is refused.
+acr = "drs-mfa"
+# The claim carrying the user's AD objectGUID (from LDAP federation).
+guid_claim = "ad_object_guid"
+max_age = 120
+# The CA for Keycloak's own TLS certificate; omit to use the system trust store.
+# ca_file = "/etc/drs/keycloak-ca.pem"
